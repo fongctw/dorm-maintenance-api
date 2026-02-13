@@ -1,4 +1,4 @@
-# Dorm Maintenance Ticket API (แจ้งซ่อมหอ)
+# Dorm Maintenance Ticket API
 
 REST API for dorm maintenance tickets built with FastAPI, SQLAlchemy, and SQLite.
 
