@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dorm Maintenance - Simple Mock UI</title>
+    <style>
+      :root {
+        --bg: #f1f7fb;
+        --card: #ffffff;
+        --text: #1f2d3d;
+        --muted: #587089;
+        --line: #d8e2ec;
+        --primary: #0f6ea8;
+        --primary-2: #1281c4;
+        --danger: #d74c4c;
+        --ok: #127c4c;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+        color: var(--text);
+        background: linear-gradient(140deg, #eaf4fb 0%, #fefcf7 60%, #f3fbf4 100%);
+      }
+
+      .container {
+        width: min(1000px, 94vw);
+        margin: 20px auto 36px;
+      }
+
+      .hero {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 14px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(22px, 3.2vw, 32px);
+      }
+
+      .small {
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 12px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px;
+      }
+
+      .card h2 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .desc {
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .micro {
+        margin: -4px 0 10px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+
+      input,
+      select,
+      textarea,
+      button {
+        width: 100%;
+        border-radius: 10px;
+        padding: 9px;
+        font: inherit;
+      }
+
+      input,
+      select,
+      textarea {
+        border: 1px solid #c5d2de;
+        background: #fff;
+      }
+
+      textarea {
+        min-height: 76px;
+        resize: vertical;
+      }
+
+      button {
+        border: 0;
+        color: #fff;
+        cursor: pointer;
+        font-weight: 700;
+        background: linear-gradient(90deg, var(--primary), var(--primary-2));
+      }
+
+      button.danger {
+        background: linear-gradient(90deg, #bf3f3f, var(--danger));
+      }
+
+      .output {
+        margin-top: 14px;
+        background: #132633;
+        color: #d4f1ff;
+        border: 1px solid #2f4554;
+        border-radius: 12px;
+        padding: 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        white-space: pre-wrap;
+        min-height: 210px;
+      }
+
+      .ok {
+        color: var(--ok);
+        font-weight: 700;
+      }
+
+      @media (max-width: 700px) {
+        .row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <section class="hero">
+        <h1>Dorm Maintenance API - Simple UI</h1>
+        <p class="small">Base URL: <b id="base-url"></b></p>
+        <p class="small">
+          This page is only for quick manual testing. API docs are still at <code>/docs</code>.
+        </p>
+      </section>
+
+      <section class="grid">
+        <article class="card stack">
+          <h2>1) Category </h2>
+          <p class="micro">Category = repair type, e.g. Electrical, Plumbing.</p>
+          <div>
+            <label>Category Name</label>
+            <input id="cat-name" value="Electrical" />
+          </div>
+          <div>
+            <label>Description</label>
+            <input id="cat-desc" value="Power issues" />
+          </div>
+          <button onclick="createCategory()">Create Category</button>
+          <div class="row">
+            <div>
+              <label>Category ID</label>
+              <input id="cat-id" type="number" value="1" />
+            </div>
+            <div>
+              <label>Show inactive?</label>
+              <select id="include-inactive">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="listCategories()">Read Categories</button>
+          <div>
+            <label>New Category Name (for update)</label>
+            <input id="cat-update-name" value="Electrical Updated" />
+          </div>
+          <button onclick="updateCategory()">Update Category Name</button>
+          <button class="danger" onclick="deleteCategory()">Delete Category (soft)</button>
+        </article>
+
+        <article class="card stack">
+          <h2>2) Ticket </h2>
+          <p class="micro">Ticket = one maintenance request from a room.</p>
+          <div><label>Title</label><input id="t-title" value="Air conditioner broken" /></div>
+          <div>
+            <label>Description</label>
+            <textarea id="t-desc">The air conditioner has stopped cooling for two days.</textarea>
+          </div>
+          <div class="row">
+            <div><label>Room</label><input id="t-room" value="A-1207" /></div>
+            <div>
+              <label>Priority</label>
+              <select id="t-priority">
+                <option>low</option>
+                <option selected>medium</option>
+                <option>high</option>
+                <option>urgent</option>
+              </select>
+            </div>
+          </div>
+          <div><label>Category ID</label><input id="t-category" type="number" value="1" /></div>
+          <button onclick="createTicket()">Create Ticket</button>
+          <div class="row">
+            <div><label>Ticket ID</label><input id="ticket-id" type="number" value="1" /></div>
+            <div>
+              <label>Role (for protected actions)</label>
+              <select id="role">
+                <option selected>student</option>
+                <option>technician</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="getTicket()">Read One Ticket</button>
+          <button onclick="listTickets()">Read Tickets</button>
+          <div>
+            <label>New Ticket Description (for update)</label>
+            <textarea id="t-update-desc">Please check after 6 PM. Student can access room then.</textarea>
+          </div>
+          <p class="micro">To update ticket: choose role = student and ticket status must be open.</p>
+          <button onclick="updateTicket()">Update Ticket Description</button>
+          <button class="danger" onclick="deleteTicket()">Delete Ticket</button>
+        </article>
+
+        <article class="card stack">
+          <h2>3) Comments + Status</h2>
+          <p class="micro">Comment = extra message in ticket. Status = progress of work.</p>
+          <div><label>Comment Message</label><input id="comment-msg" value="Please come after 6 PM" /></div>
+          <button onclick="addComment()">Create Comment</button>
+          <div>
+            <label>New Status</label>
+            <select id="new-status">
+              <option>open</option>
+              <option selected>in_progress</option>
+              <option>done</option>
+              <option>rejected</option>
+            </select>
+          </div>
+          <button onclick="updateStatus()">Update Status</button>
+          <p class="micro">Rule: student edits ticket only when open; technician changes status.</p>
+        </article>
+      </section>
+
+      <pre class="output" id="out">Ready.
+Suggested order: Create Category -> Create Ticket -> Read/Update -> Add Comment -> Update Status.</pre>
+      <p class="ok">Tip: If delete category returns 204, it is already successful (soft delete).</p>
+    </main>
+
+    <script>
+      const base = window.location.origin;
+      document.getElementById("base-url").textContent = base;
+
+      function pick(id) {
+        return document.getElementById(id).value;
+      }
+
+      function toJsonSafe(text) {
+        if (!text) return null;
+        try {
+          return JSON.parse(text);
+        } catch (_e) {
+          return text;
+        }
+      }
+
+      async function send(method, path, body = null, role = null) {
+        const headers = { "Content-Type": "application/json" };
+        if (role) headers["X-Role"] = role;
+
+        const response = await fetch(base + path, {
+          method,
+          headers,
+          body: body ? JSON.stringify(body) : null,
+        });
+
+        const text = await response.text();
+        const data = toJsonSafe(text);
+        let hint = "";
+        if (response.status === 204) hint = "Success: deleted/processed with no response body.";
+        if (response.status === 403) hint = "Forbidden: check role and status rule.";
+        if (response.status === 409) hint = "Conflict: status transition is not allowed.";
+        if (response.status === 400) hint = "Validation error: check required fields/format.";
+        const log = [
+          method + " " + path,
+          "HTTP " + response.status + (response.status === 204 ? " (success, no body)" : ""),
+          "Response:",
+          data === null ? "null" : JSON.stringify(data, null, 2),
+          hint ? "Hint: " + hint : "",
+        ].join("\n");
+        document.getElementById("out").textContent = log;
+
+        if (method === "POST" && path === "/categories" && data && data.id) {
+          document.getElementById("cat-id").value = data.id;
+          document.getElementById("t-category").value = data.id;
+        }
+        if (method === "POST" && path === "/tickets" && data && data.id) {
+          document.getElementById("ticket-id").value = data.id;
+        }
+      }
+
+      function createCategory() {
+        return send("POST", "/categories", {
+          name: pick("cat-name"),
+          description: pick("cat-desc"),
+        });
+      }
+
+      function listCategories() {
+        return send("GET", "/categories?include_inactive=" + pick("include-inactive"));
+      }
+
+      function updateCategory() {
+        return send("PUT", "/categories/" + pick("cat-id"), {
+          name: pick("cat-update-name"),
+        });
+      }
+
+      function deleteCategory() {
+        return send("DELETE", "/categories/" + pick("cat-id"));
+      }
+
+      function createTicket() {
+        return send("POST", "/tickets", {
+          title: pick("t-title"),
+          description: pick("t-desc"),
+          room: pick("t-room"),
+          priority: pick("t-priority"),
+          category_id: Number(pick("t-category")),
+        });
+      }
+
+      function getTicket() {
+        return send("GET", "/tickets/" + pick("ticket-id"));
+      }
+
+      function listTickets() {
+        return send("GET", "/tickets?limit=10&skip=0&sort_by=created_at&sort_order=desc");
+      }
+
+      function updateTicket() {
+        return send(
+          "PUT",
+          "/tickets/" + pick("ticket-id"),
+          { description: pick("t-update-desc") },
+          pick("role")
+        );
+      }
+
+      function deleteTicket() {
+        return send("DELETE", "/tickets/" + pick("ticket-id"));
+      }
+
+      function addComment() {
+        return send(
+          "POST",
+          "/tickets/" + pick("ticket-id") + "/comments",
+          { message: pick("comment-msg") },
+          pick("role")
+        );
+      }
+
+      function updateStatus() {
+        return send(
+          "PUT",
+          "/tickets/" + pick("ticket-id") + "/status",
+          { status: pick("new-status") },
+          pick("role")
+        );
+      }
+    </script>
+  </body>
+</html>
